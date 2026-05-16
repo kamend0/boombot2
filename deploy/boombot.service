@@ -1,0 +1,18 @@
+[Unit]
+Description=boombot Discord bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=boombot
+WorkingDirectory=/home/boombot/boombot2
+EnvironmentFile=/home/boombot/boombot2/.env
+ExecStart=/home/boombot/.local/bin/uv run python -m boombot.bot
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
