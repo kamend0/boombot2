@@ -28,6 +28,17 @@ In the channel named by `TRIGGER_CHANNEL_NAME` (default `boom-bot`), any message
 
 Alias → server nickname → global display name → username.
 
+## Discord setup
+
+In the Developer Portal, enable the **Server Members** and **Message Content** privileged intents. Invite the bot with scopes `bot` + `applications.commands` and these permissions:
+
+- View Channels
+- Send Messages
+- Read Message History (for chat triggers)
+- Connect (voice)
+- Speak (voice)
+- Use Voice Activity
+
 ## Local dev
 
 ```bash
