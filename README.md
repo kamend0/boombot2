@@ -4,8 +4,8 @@ A small Discord bot for a few friends. It joins a voice channel and announces wh
 
 ## Commands
 
-- `/join` — join the caller's voice channel.
-- `/leave` — disconnect from voice.
+- `/boomjoin` — join the caller's voice channel.
+- `/boomkick` — disconnect from voice.
 - `/play <sound>` — play a sound (or `any` for random).
 - `/sounds` — list available sounds.
 - `/say <text>` — speak text aloud.
@@ -38,6 +38,9 @@ In the Developer Portal, enable the **Server Members** and **Message Content** p
 - Connect (voice)
 - Speak (voice)
 - Use Voice Activity
+
+Here's the link with the above permissions:
+`https://discord.com/oauth2/authorize?client_id=1505334133503819786&permissions=2184252416&integration_type=0&scope=bot+applications.commands`
 
 ## Local dev
 

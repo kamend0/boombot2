@@ -32,8 +32,8 @@ class VoiceCog(commands.Cog):
         self.sounds = sounds
         self.modes = modes
 
-    @app_commands.command(name="join", description="Join your current voice channel.")
-    async def join(self, interaction: discord.Interaction) -> None:
+    @app_commands.command(name="boomjoin", description="Join your current voice channel.")
+    async def boomjoin(self, interaction: discord.Interaction) -> None:
         member = interaction.user
         if not isinstance(member, discord.Member) or not member.voice or not member.voice.channel:
             await interaction.response.send_message("You need to be in a voice channel first.", ephemeral=True)
@@ -51,8 +51,8 @@ class VoiceCog(commands.Cog):
         log.info("Joined voice channel %s in guild %s (by %s)", target.name, interaction.guild, member)
         await interaction.response.send_message(f"Joined **{target.name}**.")
 
-    @app_commands.command(name="leave", description="Disconnect from voice.")
-    async def leave(self, interaction: discord.Interaction) -> None:
+    @app_commands.command(name="boomkick", description="Disconnect from voice.")
+    async def boomkick(self, interaction: discord.Interaction) -> None:
         vc = interaction.guild.voice_client if interaction.guild else None
         if not vc:
             await interaction.response.send_message("I'm not in a voice channel.", ephemeral=True)
