@@ -6,3 +6,7 @@ logs/
 sounds/
 .DS_Store
 *.mp3
+
+.envrc
+commands/
+commands/*
