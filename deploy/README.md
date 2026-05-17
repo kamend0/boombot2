@@ -187,7 +187,24 @@ sudo journalctl -u boombot -f
 tail -f /home/boombot/boombot2/logs/boombot.log
 ```
 
+NOTE: Don't need to run these to set up/deploy. Just for management.
+
+```bash
+sudo systemctl stop boombot           # stop bot, will restart on reboot
+sudo systemctl disable boombot        # don't auto-start on boot
+sudo systemctl disable --now boombot  # both at once
+
+sudo systemctl status boombot         # check its status
+
+sudo systemctl enable --now boombot   # revive it, auto-start on reboot
+
+sudo rm /etc/systemd/system/boombot.service
+  && sudo systemctl daemon-reload     # nuke unit file entirely
+```
+
 ## 10. Updates later
+
+If you hook it up to GitHub:
 
 ```bash
 ssh boombot
@@ -197,19 +214,16 @@ uv sync
 sudo systemctl restart boombot
 ```
 
-## AWS / S3 setup
+Otherwise, you'll have to rsync it in from your local:
 
-Create an IAM **user** (not role — roles are for AWS-hosted compute) with this inline policy. Replace `<bucket>` and adjust the key if you changed `S3_ALIASES_KEY`:
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [{
-    "Effect": "Allow",
-    "Action": ["s3:GetObject", "s3:PutObject"],
-    "Resource": "arn:aws:s3:::<bucket>/boombot/aliases.json"
-  }]
-}
+```bash
+rsync -av --delete \
+    --exclude '.venv' \
+    --exclude '__pycache__' \
+    --exclude '.env' \
+    --exclude 'logs' \
+    --exclude 'sounds' \
+    --exclude '.git' \
+    {path/to/code/} boombot:/home/boombot/boombot2/
 ```
-
-Generate an access key for that user and put it in `.env` as `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`. No `ListBucket` or `DeleteObject` needed — the bot only `GetObject`s and `PutObject`s a single known key.
+^ trailing slashes are important! This also assumes you've got an ssh alias for boombot set up as noted above.
