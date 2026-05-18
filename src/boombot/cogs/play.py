@@ -7,6 +7,7 @@ from discord.ext import commands
 
 from boombot.playback import play_file
 from boombot.sounds import SoundLibrary
+from boombot.state import VolumeState
 from boombot.tts import synthesize
 
 log = logging.getLogger(__name__)
@@ -15,9 +16,10 @@ MAX_SAY_CHARS = 240
 
 
 class PlayCog(commands.Cog):
-    def __init__(self, bot: commands.Bot, sounds: SoundLibrary) -> None:
+    def __init__(self, bot: commands.Bot, sounds: SoundLibrary, volumes: VolumeState) -> None:
         self.bot = bot
         self.sounds = sounds
+        self.volumes = volumes
 
     async def _sound_autocomplete(
         self, interaction: discord.Interaction, current: str
@@ -53,7 +55,7 @@ class PlayCog(commands.Cog):
         path = self.sounds.path(chosen)
         await interaction.response.send_message(f"Playing **{chosen}**.")
         log.info("Play %s in guild %s by %s", chosen, interaction.guild, interaction.user)
-        await play_file(vc, path)
+        await play_file(vc, path, volume=self.volumes.get(interaction.guild.id))
 
     @app_commands.command(name="sounds", description="List available sounds.")
     async def sounds_cmd(self, interaction: discord.Interaction) -> None:
@@ -86,4 +88,4 @@ class PlayCog(commands.Cog):
 
         log.info("Say %r in guild %s by %s", text, interaction.guild, interaction.user)
         await interaction.followup.send("Speaking.")
-        await play_file(vc, path, delete_after=True)
+        await play_file(vc, path, delete_after=True, volume=self.volumes.get(interaction.guild.id))

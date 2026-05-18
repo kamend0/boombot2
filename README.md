@@ -1,6 +1,11 @@
 # boombot2
 
-A small Discord bot for a few friends. It joins a voice channel and announces who joins — either by speaking their name (gTTS) or by playing an mp3 they've claimed as their join sound. Sound files live on the VPS; aliases and per-user join sounds live in a single JSON object in S3.
+A few years ago, I made a bot called boom-bot to make my friends laugh. One of 
+those friends recently requested I bring it back from the dead. So here it is: 
+the vibe-coded dopplegänger of that old bot. It's frankly a bit better, but the 
+bar was not high.
+
+Below is 98% vibe-written.
 
 ## Commands
 
@@ -13,7 +18,8 @@ A small Discord bot for a few friends. It joins a voice channel and announces wh
   - **default**: per-user join sound if set, else TTS name.
   - **name**: always TTS name.
   - **sound**: always play a sound (user's join sound, else `boom.mp3`).
-- `/status` — show current mode and whether bot is in voice.
+- `/volume <0-200>` — set playback volume (percent) for everyone. Default 100.
+- `/status` — show current mode, volume, and whether bot is in voice.
 - `/alias set <alias> [user]` — set an alias (defaults to caller).
 - `/alias clear [user]` — clear an alias.
 - `/alias list` — show everyone's alias and join sound.

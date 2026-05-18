@@ -7,7 +7,7 @@ from discord.ext import commands
 from boombot.aliases import AliasStore
 from boombot.playback import play_file
 from boombot.sounds import SoundLibrary
-from boombot.state import DEFAULT_FALLBACK_SOUND, Mode, ModeState
+from boombot.state import DEFAULT_FALLBACK_SOUND, Mode, ModeState, VolumeState
 from boombot.tts import synthesize
 
 log = logging.getLogger(__name__)
@@ -26,11 +26,13 @@ class VoiceCog(commands.Cog):
         aliases: AliasStore,
         sounds: SoundLibrary,
         modes: ModeState,
+        volumes: VolumeState,
     ) -> None:
         self.bot = bot
         self.aliases = aliases
         self.sounds = sounds
         self.modes = modes
+        self.volumes = volumes
 
     @app_commands.command(name="boomjoin", description="Join your current voice channel.")
     async def boomjoin(self, interaction: discord.Interaction) -> None:
@@ -82,9 +84,25 @@ class VoiceCog(commands.Cog):
             await interaction.response.send_message("Server only.", ephemeral=True)
             return
         m = self.modes.get(interaction.guild.id)
+        v = self.volumes.get(interaction.guild.id)
         vc = interaction.guild.voice_client
         where = f"in **{vc.channel.name}**" if vc else "not in voice"
-        await interaction.response.send_message(f"Mode: **{m.value}**, {where}.")
+        await interaction.response.send_message(
+            f"Mode: **{m.value}**, volume: **{int(v * 100)}%**, {where}."
+        )
+
+    @app_commands.command(
+        name="volume",
+        description="Set playback volume for everyone (0-200%, default 100).",
+    )
+    @app_commands.describe(percent="Volume percentage, 0–200.")
+    async def volume(self, interaction: discord.Interaction, percent: app_commands.Range[int, 0, 200]) -> None:
+        if not interaction.guild:
+            await interaction.response.send_message("Server only.", ephemeral=True)
+            return
+        applied = self.volumes.set(interaction.guild.id, percent / 100.0)
+        log.info("Volume set to %.2f in guild %s by %s", applied, interaction.guild, interaction.user)
+        await interaction.response.send_message(f"Volume set to **{int(applied * 100)}%**.")
 
     @commands.Cog.listener()
     async def on_voice_state_update(
@@ -122,7 +140,7 @@ class VoiceCog(commands.Cog):
             sound = entry.join_sound or DEFAULT_FALLBACK_SOUND
             path = self.sounds.path(sound)
             if path:
-                await play_file(vc, path)
+                await play_file(vc, path, volume=self.volumes.get(member.guild.id))
             else:
                 log.warning("Sound mode: no file for '%s'", sound)
             return
@@ -131,7 +149,7 @@ class VoiceCog(commands.Cog):
         if entry.join_sound:
             path = self.sounds.path(entry.join_sound)
             if path:
-                await play_file(vc, path)
+                await play_file(vc, path, volume=self.volumes.get(member.guild.id))
                 return
             log.warning("User %s has join_sound=%s but file missing; falling back to TTS.", member, entry.join_sound)
         await self._speak(vc, _best_name(member, entry.alias))
@@ -143,4 +161,4 @@ class VoiceCog(commands.Cog):
         except Exception as e:
             log.exception("TTS failed: %s", e)
             return
-        await play_file(vc, path, delete_after=True)
+        await play_file(vc, path, delete_after=True, volume=self.volumes.get(vc.guild.id))

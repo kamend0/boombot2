@@ -13,6 +13,7 @@ async def play_file(
     path: Path,
     *,
     delete_after: bool = False,
+    volume: float = 1.0,
 ) -> None:
     """Play an audio file. Waits until the previous track finishes."""
     while voice.is_playing():
@@ -26,7 +27,9 @@ async def play_file(
             log.error("Playback error for %s: %s", path, err)
         loop.call_soon_threadsafe(done.set)
 
-    source = discord.FFmpegPCMAudio(str(path))
+    source = discord.PCMVolumeTransformer(
+        discord.FFmpegPCMAudio(str(path)), volume=volume
+    )
     voice.play(source, after=_after)
     try:
         await done.wait()

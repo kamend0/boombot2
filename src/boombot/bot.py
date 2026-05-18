@@ -12,7 +12,7 @@ from boombot.cogs.voice import VoiceCog
 from boombot.config import load_config
 from boombot.logging_setup import setup_logging
 from boombot.sounds import SoundLibrary
-from boombot.state import ModeState
+from boombot.state import ModeState, VolumeState
 
 log = logging.getLogger(__name__)
 
@@ -29,6 +29,7 @@ async def main() -> None:
     log.info("Loaded %d sounds: %s", len(sounds.names()), ", ".join(sounds.names()) or "(none)")
 
     modes = ModeState()
+    volumes = VolumeState()
 
     intents = discord.Intents.default()
     intents.members = True
@@ -52,10 +53,10 @@ async def main() -> None:
         except Exception as e:
             log.exception("Slash command sync failed: %s", e)
 
-    await bot.add_cog(VoiceCog(bot, aliases, sounds, modes))
-    await bot.add_cog(PlayCog(bot, sounds))
+    await bot.add_cog(VoiceCog(bot, aliases, sounds, modes, volumes))
+    await bot.add_cog(PlayCog(bot, sounds, volumes))
     await bot.add_cog(AliasCog(bot, aliases, sounds))
-    await bot.add_cog(TriggerCog(bot, sounds, cfg.trigger_channel_name))
+    await bot.add_cog(TriggerCog(bot, sounds, volumes, cfg.trigger_channel_name))
 
     async with bot:
         await bot.start(cfg.discord_token)
